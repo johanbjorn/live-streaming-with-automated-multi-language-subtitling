@@ -73,6 +73,20 @@ cd $source_dir/captionlambda/
 pip3 install -r ./requirements.txt -t . 
 zip -q -r9 $build_dist_dir/captionlambda.zip *
 
+echo "------------------------------------------------------------------------------"
+echo "[Rebuild] custom-resource-py Function"
+echo "------------------------------------------------------------------------------"
+cd $source_dir/custom_resources_py/ 
+echo $PWD
+zip -q -r9 $build_dist_dir/custom-resource-py.zip *
+
+echo "------------------------------------------------------------------------------"
+echo "[Rebuild] custom-resource-js Function"
+echo "------------------------------------------------------------------------------"
+cd $source_dir/custom_resources_js/ 
+rm -rf node_modules/
+npm ci --production
+zip -q -r9 $build_dist_dir/custom-resource-js.zip *
 
 # Build Transcribelambda (Moving the ZIP file into the distribution directory)
 # cd $deployment_dir/..
