@@ -1,1 +1,10 @@
 .DS_Store
+/source/transcribelambda/TranscribeStreamingJavaLambda-II.jar
+/source/transcribelambda/TranscribeStreamingJavaLambda.jar
+/source/transcribelambda/gradle/.gradle/
+/source/transcribelambda/gradle/build/
+/source/transcribelambda/gradle/gradle/
+/source/transcribelambda/gradle/gradlew
+/source/transcribelambda/gradle/gradlew.bat
+global-s3-assets/
+regional-s3-assets/
