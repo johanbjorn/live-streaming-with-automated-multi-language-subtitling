@@ -69,10 +69,20 @@ sed -i '' -e $replace $template_dist_dir/*.template
 echo "------------------------------------------------------------------------------"
 echo "[Rebuild] captionlambda Function"
 echo "------------------------------------------------------------------------------"
-cd $source_dir/captionlambda/ 
+cd $source_dir/captionlambda2/ 
+#pip3 install -r ./requirements.txt -t . 
+echo $PWD
 pip3 install -r ./requirements.txt -t . 
 zip -q -r9 $build_dist_dir/captionlambda.zip *
 
+#zip -q -r9 $build_dist_dir/captionlambda.zip *
+
+echo "------------------------------------------------------------------------------"
+echo "[Rebuild] alt-cust-res Function"
+echo "------------------------------------------------------------------------------"
+cd $source_dir/alt-cust-res/ 
+pip3 install -r ./requirements.txt -t . 
+zip -q -r9 $build_dist_dir/custom-resource-py.zip *
 
 # Build Transcribelambda (Moving the ZIP file into the distribution directory)
 # cd $deployment_dir/..

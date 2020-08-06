@@ -8,5 +8,5 @@ cp ffprobe deploy/
 cp src/audiomagic.py deploy/
 cp -r venv/lib/python3.6/site-packages/* deploy/
 
-cd deploy ; zip -r -X ../deploy.zip . * ; cd ..
-aws lambda update-function-code --function-name $function_name --zip-file fileb://deploy.zip
+cd deploy ; zip -r -X ../deploy.zip . * ; cd ..; rm -rf deploy
+#aws lambda update-function-code --function-name $function_name --zip-file fileb://deploy.zip

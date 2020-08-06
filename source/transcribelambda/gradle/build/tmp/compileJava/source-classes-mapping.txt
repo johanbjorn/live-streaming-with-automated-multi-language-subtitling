@@ -1,0 +1,12 @@
+com/amazonaws/transcribestreaming/cli/TextObject.java
+ com.amazonaws.transcribestreaming.cli.TextObject
+LambdaPackage/Lambda.java
+ LambdaPackage.Lambda
+com/amazonaws/transcribestreaming/cli/TranscribeStreamingDemoApp.java
+ com.amazonaws.transcribestreaming.cli.TranscribeStreamingDemoApp
+ com.amazonaws.transcribestreaming.cli.TranscribeStreamingDemoApp$1
+ com.amazonaws.transcribestreaming.cli.TranscribeStreamingDemoApp$AudioStreamPublisher
+ com.amazonaws.transcribestreaming.cli.TranscribeStreamingDemoApp$JobType
+ com.amazonaws.transcribestreaming.cli.TranscribeStreamingDemoApp$SubscriptionImpl
+com/amazonaws/transcribestreaming/cli/ResponseObject.java
+ com.amazonaws.transcribestreaming.cli.ResponseObject

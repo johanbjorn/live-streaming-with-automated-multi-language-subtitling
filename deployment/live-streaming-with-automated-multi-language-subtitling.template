@@ -209,7 +209,7 @@ Mappings:
     General:
       S3Bucket: %%BUCKET_NAME%%
       KeyPrefix: live-streaming-with-automated-multi-language-subtitling/v1.0.3
-
+      
   AnonymousData:
     SendAnonymousData:
       Data: Yes
