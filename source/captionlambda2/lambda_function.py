@@ -197,13 +197,47 @@ def get_text_from_transcribe(ts_file_path):
         print("EXCEPTION: ts file doesn't exist to make PCM file for Transcribe : " + ts_file_path)
         sys.exit()
 
+    # to mp4
+    print("DEBUG: to mp4 ")
+    output_mp4 = TMP_DIR + str(make_random_string()) + '.mp4'
+    cmd2 = './ffmpeg -i ' + ts_file_path + ' ' + output_mp4 + '  > /dev/null 2>&1 '
+    mp4_ffmpeg_response = os.popen(cmd2).read()
+    print("DEBUG: mp4_ffmpeg_response " + mp4_ffmpeg_response)
+    # After FFMPEG send the file into S3 and generate presigned URL.
+    print("checking to see if mp4 exists " + output_mp4 + ' ' + str(os.path.exists(output_mp4)))
+    
+    s3_key2 = 'mp4/' + output_mp4.split('/')[-1]
+    print("DEBUG: After FFMPEG send the file, output_mp4 " + output_mp4)
+    print("DEBUG: After FFMPEG send the file, s3_key2 " + s3_key2)
+    upload_file_s3(output_mp4, s3_key2)
+
+    # Remove the file I just uploaded to s3
+    os.remove(output_mp4)
+
+    #call Rekognition
+    rek = boto3.client('rekognition')
+ 
+    regkognitionRoleArn = os.environ['regkognitionRoleArn']
+    amazonRekognitionTopicArn = os.environ['amazonRekognitionTopicArn']
+    print("DEBUG: rekogRole.arn " + regkognitionRoleArn)
+    print("DEBUG: amazonRekognitionTopicArn " + amazonRekognitionTopicArn)
+    presigned_url_mp4 = get_presigned_url_s3(s3_key2)
+    response=rek.start_label_detection(Video={'S3Object': {'Bucket': BUCKET_NAME, 'Name': s3_key2}},
+        NotificationChannel={'RoleArn': regkognitionRoleArn, 'SNSTopicArn': amazonRekognitionTopicArn})
+    print('Start Job Id: ' + response['JobId'])  
+    print('Start Job response: ' + response) 
+    
+
     # Use ffmpeg to create PCM audio file for Transcribe
     output_pcm = TMP_DIR + str(make_random_string()) + '.pcm'
     cmd = './ffmpeg -hide_banner -nostats -loglevel error -y -i ' + ts_file_path + ' -vn -f s16le -acodec pcm_s16le -ac 1 -ar 16000 ' + output_pcm + '  > /dev/null 2>&1 '
     wav_ffmpeg_response = os.popen(cmd).read()
-
+    print("DEBUG: wav_ffmpeg_response " + wav_ffmpeg_response)
     # After FFMPEG send the file into S3 and generate presigned URL.
+    print("checking to see if output_pcm exists " + output_pcm + ' ' + str(os.path.exists(output_pcm)))
     s3_key = 'audio_files/' + output_pcm.split('/')[-1]
+    print("DEBUG: After FFMPEG send the file, output_pcm " + output_pcm)
+    print("DEBUG: After FFMPEG send the file, s3_key " + s3_key)
     upload_file_s3(output_pcm, s3_key)
     presigned_url = get_presigned_url_s3(s3_key)
 
@@ -622,6 +656,8 @@ def caption_generation(child_name, child_manifest, pipe_number):
         base_name = 'livestream_pipe0/'
 
     print("GETTING: Downloading file from S3 for captions trying to get this file : " + base_name + ts_segment_name )
+    print("GETTING: Down " + base_name )
+    print("GETTING: Down " + ts_segment_name )
     ts_file_path = download_file_from_s3(base_name + ts_segment_name, BUCKET_NAME)
 
     # Push TS segment to MediaPackage
@@ -691,6 +727,7 @@ def lambda_handler(event, context):
     # Check if the manifest is a master manifest
     if 'channel.m3u8' in s3_key:
         # It is a master manifest. Send the master manifest. 
+        print("It is a master manifest. Send the master manifest." )
         send_master_manifest_to_mediapackage(s3_key, s3_version, pipe_number)
     
     # Check if the file is a child manifest file.
@@ -699,14 +736,17 @@ def lambda_handler(event, context):
         # Check to see if it is the _416x234_200k rendition of the video. This is what I will use for caption generation.
         if NAME_MODIFIER in s3_key:
             # Get child manifest
+            print("DEBUG: Get child manifest, s3_key" +  s3_key)
             manifest_file = get_s3_file_versionid(s3_key, s3_version)
             # Get child name
             manifest_name = s3_key.split('/')[-1]
-
+            print("DEBUG: Get child name, manifest_name" +  manifest_name)
+            
             caption_generation(manifest_name, manifest_file, pipe_number)
 
         else: 
             # Send the TS file within the manifest.
+            print("Send the TS file within the manifest." )
             send_ts_file_and_manifest(s3_key, s3_version, pipe_number)
 
     return True

@@ -225,6 +225,69 @@ Conditions:
 
 Resources:
 
+  RekognitionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${AWS::StackName}-RekognitionRole"
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          -
+            Effect: Allow
+            Principal:
+              Service:
+                - "rekognition.amazonaws.com"
+            Action:
+              - sts:AssumeRole
+
+  RekognitionRolePolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      Roles:
+        - !Ref RekognitionRole
+      PolicyName: !Sub "${AWS::StackName}-RekognitionRolePolicy"
+      PolicyDocument:
+        Statement:
+          -
+            Effect: Allow
+            Action:
+              - sns:Publish
+            Resource:
+              - !GetAtt AmazonRekognitionTopic.Arn
+
+  AmazonRekognitionQueue: 
+    Type: AWS::SQS::Queue
+    Properties: 
+      QueueName: !Sub "${AWS::StackName}-AmazonRekognitionQueue"
+          
+  AmazonRekognitionTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      Subscription:
+        - Endpoint:
+            Fn::GetAtt:
+              - "AmazonRekognitionQueue"
+              - "Arn"
+          Protocol: "sqs"
+      TopicName: !Sub "${AWS::StackName}-"AmazonRekognitionTopic"
+  
+  QueuePolicy: 
+    Type: AWS::SQS::QueuePolicy
+    Properties: 
+      Queues: 
+        - !Ref AmazonRekognitionQueue
+      PolicyDocument: 
+        Statement: 
+          - 
+            Action: 
+              - "SQS:SendMessage" 
+              - "SQS:ReceiveMessage"
+            Effect: "Allow"
+            Resource: !GetAtt AmazonRekognitionQueue.Arn
+            Principal:  
+              AWS: 
+                - "*" 
+      
   CustomResourceRole:
     Type: AWS::IAM::Role
     Properties:
@@ -568,6 +631,7 @@ Resources:
           mediaPackageUsernamePipe1: !GetAtt MediaPackageChannel.SecondaryUser
           captionLanguages: !Ref SubtitleLanguages
           transcribeLambdaARN: !GetAtt TranscribeLambda.Arn
+          regkognitionRoleArn: !GetAttRekognitionRole.Arn
 
 # Java Lambda
   TranscribeLambda:
@@ -811,3 +875,6 @@ Outputs:
     Condition: UseCloudFrontForMediaPackage
     Description: MSS CloudFront URL
     Value: !Sub https://${CloudFront.DomainName}${MediaPackageMssEndpoint.Manifest}
+    
+  AmazonRekognitionQueue:
+    Value: !Ref AmazonRekognitionQueue  

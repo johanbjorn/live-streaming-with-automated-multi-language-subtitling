@@ -84,6 +84,12 @@ cd $source_dir/alt-cust-res/
 pip3 install -r ./requirements.txt -t . 
 zip -q -r9 $build_dist_dir/custom-resource-py.zip *
 
+
+echo "------------------------------------------------------------------------------"
+echo "[Rebuild] alt-cust-res Function"
+echo "------------------------------------------------------------------------------"
+cd $source_dir/updatesearchindex/ 
+zip -q -r9 $build_dist_dir/update-search-engine.zip * -x ".application.json" -x ".gitignore" -x "template.yaml"
 # Build Transcribelambda (Moving the ZIP file into the distribution directory)
 # cd $deployment_dir/..
 cp $source_dir/transcribelambda/TranscribeStreamingJavaLambda.jar $build_dist_dir/

@@ -1,0 +1,17 @@
+{
+    "updatesearchindex": {
+        "lambda": {
+            "MessageId": "afd14981-eeec-4f08-8d6a-dda089f7068d",
+            "ReceiptHandle": "AQEBDiAGztLx1G4Xf+v2eSd5M6uCumkvSs+MsAcUGkiH5UBGLnEne39/OljuTGCdXwNzil2EGtPL2dm4+NWC+VUp9X8bgMw1bquB7FYD0Zip4Gp73ZITb1VnlxyeoD/nzCwIY9+mLGmfiBEa8hELxwDrlHx2lQGyVAUQn4NTV963T2Hz67SNjREddk4j+2v56hcaJBzRIjgfofw/myRJNgFWzljbU98YsqgP0lxVuwrhiJMsxipiVS714rNVLJd3od49hjZUNuQl6cI724NiBe+Jq1SgrKrq2JCIksgiGNW8cSaO7im3FtBJIJMNAvbh9FhXbXe36QfqC+3mp4A0/dsVGkgD4gOLPSSBGWPh3m8mZsIvZp7PAcYbuWQPMYx7LsjTVKKrUTrwkjfE2EjSIZFYNJPfyOZxdNDCNDjltTnt9CM=",
+            "MD5OfBody": "75cb2974cf722d6266c0ac7d60bfc6e3",
+            "Body": "{\n  \"Type\" : \"Notification\",\n  \"MessageId\" : \"b683ec8b-cc27-5873-a8cc-bb2236b22bed\",\n  \"TopicArn\" : \"arn:aws:sns:us-east-1:574913518171:livestream-no-64-AmazonRekognitionTopic\",\n  \"Message\" : \"{\\\"JobId\\\":\\\"290b4b34fca63ba51be39be284c9c9f28a821dbf4a0f8ebe68bd35c3f1599905\\\",\\\"Status\\\":\\\"SUCCEEDED\\\",\\\"API\\\":\\\"StartLabelDetection\\\",\\\"Timestamp\\\":1596979285835,\\\"Video\\\":{\\\"S3ObjectName\\\":\\\"mp4/MDMmqPB58C1LWNallOKi200KbRgAdhhi.mp4\\\",\\\"S3Bucket\\\":\\\"livestream-no-64-captionsbucket-1ljojjock0sr9\\\"}}\",\n  \"Timestamp\" : \"2020-08-09T13:21:25.891Z\",\n  \"SignatureVersion\" : \"1\",\n  \"Signature\" : \"Z94O7lX21YyQO5CnD2CdPwR2RNGaJB+XQ2cWMW1HLCMj9YaMwdxpgssQxBBRrY2GBmHT4/8+te0CsVXWx36cVipWLmPMxWXX2/ndTWNKUpk9yTo9D9/pRiaFjytnRijjJORF9w5BGFWrLMPkLKiGjZ+Y2j+dQMQQjjMI4O+zS0k1SHJIKeld27gUB9R57EhiMzMoWu5/R4kIdfeNusLR0lPxSJQr5FrF720SmSpbg7QtjWg3FAUD+O8ghqc8fAolcrgJHAgsbnLXkGKAkGtMiLJx+1ivWYbBIFWdn+efnlegXBg+V4acWB2LflT4pqYWzbjrAb01OdOhOwueOHI8Tg==\",\n  \"SigningCertURL\" : \"https://sns.us-east-1.amazonaws.com/SimpleNotificationService-a86cb10b4e1f29c941702d737128f7b6.pem\",\n  \"UnsubscribeURL\" : \"https://sns.us-east-1.amazonaws.com/?Action=Unsubscribe&SubscriptionArn=arn:aws:sns:us-east-1:574913518171:livestream-no-64-AmazonRekognitionTopic:d88d07e7-19cf-484b-a21d-17fef45c3ec1\"\n}",
+            "Attributes": {
+                "SenderId": "AIDAIT2UOQQY3AUEKVGXU",
+                "ApproximateFirstReceiveTimestamp": "1596981763766",
+                "ApproximateReceiveCount": "1",
+                "SentTimestamp": "1596979285929",
+                "AWSTraceHeader": "Root=1-5f2ff855-b5397ba7cce3c1348f378ded;Sampled=0"
+            }
+        }
+    }
+}

@@ -1,0 +1,10 @@
+[
+  {
+    "ParameterKey": "PriPullURL",
+    "ParameterValue": "https://builder-johanbjorn-priv.s3-us-west-2.amazonaws.com/output/BraVsGer_720.m3u8"
+  }, 
+  {
+    "ParameterKey": "SecPullURL",
+    "ParameterValue": "m1.https://builder-johanbjorn-priv.s3-us-west-2.amazonaws.com/output/BraVsGer_720.m3u8"
+  }
+]
