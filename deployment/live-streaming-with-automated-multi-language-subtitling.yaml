@@ -2,6 +2,10 @@ Description: '(SO0052) - Live Streaming with Automated Multi-Language Subtitles 
 
 Parameters:
 
+  ESDOMAIN:
+    Description: DOMAIN of the elasticsearch cluster
+    Type: String
+    Default: invalid-domain
   Code:
     Description: Select the Code Base to use to deploy the media services.
     Type: String
@@ -325,9 +329,12 @@ Resources:
                 - sqs:DeleteMessage
                 - sqs:GetQueueAttributes
                 - sqs:ChangeMessageVisibility
-                Resource: !GetAtt AmazonRekognitionQueue.Arn                  
-              -
-                Effect: Allow
+                Resource: !GetAtt AmazonRekognitionQueue.Arn 
+              - Effect: Allow
+                Action:
+                - "es:ESHttp*"
+                Resource: !ImportValue ESDomainArn  
+              - Effect: Allow
                 Action:
                   - rekognition:DetectLabels
                   - rekognition:ListCollections
@@ -500,7 +507,11 @@ Resources:
         S3Key: !Join ["/", [!FindInMap ["SourceCode", "General", "KeyPrefix"],  "update-search-engine.zip"]]
       Runtime:  nodejs12.x
       Timeout: 180
-      
+      Environment:
+        Variables:
+          REGION: "us-east-1"
+          DOMAIN: !ImportValue ESDomainEndpoint
+          
   LambdaFunctionEventSourceMapping:
     Type: AWS::Lambda::EventSourceMapping
     Properties:
@@ -592,7 +603,7 @@ Resources:
 
 
   LogsBucket:
-    DeletionPolicy: Retain
+    DeletionPolicy: Delete
     Type: AWS::S3::Bucket
     Properties:
       AccessControl: LogDeliveryWrite
@@ -976,3 +987,7 @@ Outputs:
     
   AmazonRekognitionQueue:
     Value: !Ref AmazonRekognitionQueue  
+  
+  UpdateSearchIndexRoleUser: 
+    Value: !Sub arn:aws:sts::${AWS::AccountId}:assumed-role/${UpdateSearchIndexRole}/${AWS::StackName}-update-search-index
+    

@@ -61,7 +61,7 @@ POOL = ThreadPool(processes=16)
 TMP_DIR = '/tmp/'
 # Global Bucket for temp storage
 BUCKET_NAME = ""
-NAME_MODIFIER = '_416x234_200k'
+NAME_MODIFIER = '_1280x720_3300k'
 # Caption languages getting generated.
 LANGUAGES = []
 
@@ -199,8 +199,9 @@ def get_text_from_transcribe(ts_file_path):
 
     # to mp4
     print("DEBUG: to mp4 ")
-    output_mp4 = TMP_DIR + str(make_random_string()) + '.mp4'
-    cmd2 = './ffmpeg -i ' + ts_file_path + ' ' + output_mp4 + '  > /dev/null 2>&1 '
+    #output_mp4 = TMP_DIR + str(make_random_string()) + '.mp4'
+    output_mp4 = ts_file_path.replace("ts", "mp4");
+    cmd2 = './ffmpeg -i ' + ts_file_path + ' -acodec copy -vcodec copy ' + output_mp4 + '  > /dev/null 2>&1 '
     mp4_ffmpeg_response = os.popen(cmd2).read()
     print("DEBUG: mp4_ffmpeg_response " + mp4_ffmpeg_response)
     # After FFMPEG send the file into S3 and generate presigned URL.
@@ -221,44 +222,43 @@ def get_text_from_transcribe(ts_file_path):
     amazonRekognitionTopicArn = os.environ['amazonRekognitionTopicArn']
     print("DEBUG: rekogRole.arn " + regkognitionRoleArn)
     print("DEBUG: amazonRekognitionTopicArn " + amazonRekognitionTopicArn)
-    presigned_url_mp4 = get_presigned_url_s3(s3_key2)
     response=rek.start_label_detection(Video={'S3Object': {'Bucket': BUCKET_NAME, 'Name': s3_key2}},
         NotificationChannel={'RoleArn': regkognitionRoleArn, 'SNSTopicArn': amazonRekognitionTopicArn})
     print('Start Job Id: ' + response['JobId'])  
-    print('Start Job response: ' + response) 
+    #print('Start Job response: ' + response) 
     
 
     # Use ffmpeg to create PCM audio file for Transcribe
-    output_pcm = TMP_DIR + str(make_random_string()) + '.pcm'
-    cmd = './ffmpeg -hide_banner -nostats -loglevel error -y -i ' + ts_file_path + ' -vn -f s16le -acodec pcm_s16le -ac 1 -ar 16000 ' + output_pcm + '  > /dev/null 2>&1 '
-    wav_ffmpeg_response = os.popen(cmd).read()
-    print("DEBUG: wav_ffmpeg_response " + wav_ffmpeg_response)
-    # After FFMPEG send the file into S3 and generate presigned URL.
-    print("checking to see if output_pcm exists " + output_pcm + ' ' + str(os.path.exists(output_pcm)))
-    s3_key = 'audio_files/' + output_pcm.split('/')[-1]
-    print("DEBUG: After FFMPEG send the file, output_pcm " + output_pcm)
-    print("DEBUG: After FFMPEG send the file, s3_key " + s3_key)
-    upload_file_s3(output_pcm, s3_key)
-    presigned_url = get_presigned_url_s3(s3_key)
+    # output_pcm = TMP_DIR + str(make_random_string()) + '.pcm'
+    # cmd = './ffmpeg -hide_banner -nostats -loglevel error -y -i ' + ts_file_path + ' -vn -f s16le -acodec pcm_s16le -ac 1 -ar 16000 ' + output_pcm + '  > /dev/null 2>&1 '
+    # wav_ffmpeg_response = os.popen(cmd).read()
+    # print("DEBUG: wav_ffmpeg_response " + wav_ffmpeg_response)
+    # # After FFMPEG send the file into S3 and generate presigned URL.
+    # print("checking to see if output_pcm exists " + output_pcm + ' ' + str(os.path.exists(output_pcm)))
+    # s3_key = 'audio_files/' + output_pcm.split('/')[-1]
+    # print("DEBUG: After FFMPEG send the file, output_pcm " + output_pcm)
+    # print("DEBUG: After FFMPEG send the file, s3_key " + s3_key)
+    # upload_file_s3(output_pcm, s3_key)
+    # presigned_url = get_presigned_url_s3(s3_key)
 
-    # Remove the file I just uploaded to s3
-    os.remove(output_pcm)
+    # # Remove the file I just uploaded to s3
+    # os.remove(output_pcm)
 
-    # Use Presigned url with the API for security.
-    client = boto3.client('lambda') 
-    try:
-        response = client.invoke(FunctionName=TRANSCRIBE_LAMBDA_ARN, Payload=json.dumps({'body' : presigned_url}))
-        json_res = json.loads(json.loads(response['Payload'].read())['body'])
+    # # Use Presigned url with the API for security.
+    # client = boto3.client('lambda') 
+    # try:
+    #     response = client.invoke(FunctionName=TRANSCRIBE_LAMBDA_ARN, Payload=json.dumps({'body' : presigned_url}))
+    #     json_res = json.loads(json.loads(response['Payload'].read())['body'])
     
-        # Get Text
-        text = json_res['transcript']
-        print("DEBUG: Text returned from Transcribe Streaming is: " + text)
+    #     # Get Text
+    #     text = json_res['transcript']
+    #     print("DEBUG: Text returned from Transcribe Streaming is: " + text)
 
-    except Exception as e:
-        print("EXCEPTION: AWS Transcribe Streaming is throttling! Putting empty subtitle into stream. Increase Transcribe Streaming Limits: " + str(e))
-        # Set the text to nothing. 
-        text = ""
-
+    # except Exception as e:
+    #     print("EXCEPTION: AWS Transcribe Streaming is throttling! Putting empty subtitle into stream. Increase Transcribe Streaming Limits: " + str(e))
+    #     # Set the text to nothing. 
+    #     text = ""
+    text = ""
     return text
 
 
@@ -662,7 +662,7 @@ def caption_generation(child_name, child_manifest, pipe_number):
 
     # Push TS segment to MediaPackage
     # If using Polly is True Audio and Video will be split for an english only track.
-    send_ts_to_mediapackage(ts_file_path, ts_segment_name, child_manifest, using_polly, pipe_number)
+    send_ts_to_mediapackage(ts_file_path, ts_segment_name, child_manifest, using_polly, pipe_number) #same as files not caption generate
 
     print("TRANSCRIBE: Getting text from transcribe ")
     # Use TS with FFMPEG to make captions
@@ -743,12 +743,13 @@ def lambda_handler(event, context):
             print("DEBUG: Get child name, manifest_name" +  manifest_name)
             
             caption_generation(manifest_name, manifest_file, pipe_number)
-
+            print("caption done")
         else: 
             # Send the TS file within the manifest.
             print("Send the TS file within the manifest." )
             send_ts_file_and_manifest(s3_key, s3_version, pipe_number)
-
+            print("straight to mediapackage done")
+    print("all done")
     return True
 
 

@@ -1,0 +1,60 @@
+Description: 'Elasticsearch cluster'
+
+Parameters:
+  UpdateSearchIndex:
+    Description: arn of role of update-search-index 
+    Type: String
+    Default: none
+      
+Conditions:
+    HasUpdateSearchIndexRole: !Not [!Equals [!Ref UpdateSearchIndex, "none"]]
+    
+Resources:
+  
+  ElasticsearchDomain:
+    Type: 'AWS::Elasticsearch::Domain'
+    Properties:
+      # AdvancedSecurityOptions:
+      #   Enabled: True
+      #   InternalUserDatabaseEnabled: Boolean
+      #   MasterUserOptions: 
+      #     MasterUserOptionsF        
+      DomainName: !Sub "${AWS::StackName}-test"
+      ElasticsearchClusterConfig:
+        DedicatedMasterEnabled: 'false'
+        InstanceCount: '1'
+        ZoneAwarenessEnabled: 'false'
+        InstanceType: m4.large.elasticsearch
+      ElasticsearchVersion: 7.4
+      EBSOptions:
+        EBSEnabled: true
+        VolumeSize: 60
+        VolumeType: gp2
+      AccessPolicies:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS: [!Ref "AWS::AccountId", !If [HasUpdateSearchIndexRole, !Ref "UpdateSearchIndex", !Ref "AWS::NoValue"]]
+            Action: 'es:ESHttp*'
+      #       Resource: !Sub 'arn:aws:es:${AWS::Region}:${AWS::AccountId}:domain/test/*'
+      # LogPublishingOptions:
+      #   SEARCH_SLOW_LOGS:
+      #     CloudWatchLogsLogGroupArn: !Sub 'arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:test-1'
+      #     Enabled: true
+      #   INDEX_SLOW_LOGS:
+      #     CloudWatchLogsLogGroupArn: !Sub 'arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:test-2'
+      #     Enabled: true
+      #   ES_APPLICATION_LOGS:
+      #     CloudWatchLogsLogGroupArn: !Sub 'arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:test-3'
+      #     Enabled: true
+
+Outputs:
+  ElasticsearchDomainDomainArn:  
+    Value: !GetAtt ElasticsearchDomain.DomainArn
+    Export:
+      Name: ESDomainArn    
+  ElasticsearchDomainDomainEndpoint:  
+    Value: !GetAtt ElasticsearchDomain.DomainEndpoint
+    Export:
+      Name: ESDomainEndpoint

@@ -10,3 +10,7 @@ Resources:
       Description: ''
       MemorySize: 128
       Timeout: 15
+      Environment:
+        Variables:
+          REGION: "us-east-1"
+          DOMAIN: "search-livestream-no-105-test-pnhejzppwfyhvb6yx663kisyne.us-east-1.es.amazonaws.com"
