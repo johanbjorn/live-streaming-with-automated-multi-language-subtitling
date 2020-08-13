@@ -218,6 +218,7 @@ def get_text_from_transcribe(ts_file_path):
     #call Rekognition
     rek = boto3.client('rekognition')
  
+    # label-detection
     regkognitionRoleArn = os.environ['regkognitionRoleArn']
     amazonRekognitionTopicArn = os.environ['amazonRekognitionTopicArn']
     print("DEBUG: rekogRole.arn " + regkognitionRoleArn)
@@ -227,6 +228,10 @@ def get_text_from_transcribe(ts_file_path):
     print('Start Job Id: ' + response['JobId'])  
     #print('Start Job response: ' + response) 
     
+    # celebrity-detection 
+    rek.start_celebrity_recognition(Video={'S3Object': {'Bucket': BUCKET_NAME, 'Name': s3_key2}},
+        NotificationChannel={'RoleArn': regkognitionRoleArn, 'SNSTopicArn': amazonRekognitionTopicArn})
+    print('Start Job Id, celebrity: ' + response['JobId'])         
 
     # Use ffmpeg to create PCM audio file for Transcribe
     # output_pcm = TMP_DIR + str(make_random_string()) + '.pcm'

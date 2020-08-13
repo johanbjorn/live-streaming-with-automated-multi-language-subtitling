@@ -12,6 +12,7 @@ exports.handler = (event, context, callback) => {
       let message = JSON.parse(JSON.parse(body).Message)
       let jobId = message.JobId
       let status = message.Status
+      let api = message.API
       let offset = message.Video.S3ObjectName.substr(27, 5) * 6006
       console.log("JobId: " + jobId);
       console.log("Status: "+ status);
@@ -34,7 +35,7 @@ exports.handler = (event, context, callback) => {
         data.Labels.forEach(label => {
             //console.log(label);
             label.Timestamp = label.Timestamp + offset
-            indexDocument(label)
+            indexDocument(label, api)
           });
       }
     });    
@@ -43,10 +44,14 @@ exports.handler = (event, context, callback) => {
     callback();
 };
 
-function indexDocument(json) {
+function indexDocument(json, api) {
     var region = process.env.REGION; // e.g. us-west-1
     var domain = process.env.DOMAIN; // e.g. search-domain.region.es.amazonaws.com //'/' + id;
-    var index = 'node-test';
+    var index = "celebrity-detect"
+    if(api=="StartLabelDetection"){
+      index = 'label-detect';      
+    }
+
     var type = '_doc';
     
     var endpoint = new AWS.Endpoint(domain);
@@ -67,14 +72,14 @@ function indexDocument(json) {
     
     var client = new AWS.HttpClient();
     client.handleRequest(request, null, function(response) {
-    console.log(response.statusCode + ' ' + response.statusMessage);
-    var responseBody = '';
-    response.on('data', function (chunk) {
-      responseBody += chunk;
-    });
-    response.on('end', function (chunk) {
-      console.log('Response body: ' + responseBody);
-    });
+        console.log(response.statusCode + ' ' + response.statusMessage);
+        var responseBody = '';
+        response.on('data', function (chunk) {
+          responseBody += chunk;
+        });
+        response.on('end', function (chunk) {
+          console.log('Response body: ' + responseBody);
+        });
     }, function(error) {
     console.log('Error: ' + error);
     });
