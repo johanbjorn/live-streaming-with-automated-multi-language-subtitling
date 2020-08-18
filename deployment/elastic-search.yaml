@@ -37,6 +37,13 @@ Resources:
             Principal:
               AWS: [!Ref "AWS::AccountId", !If [HasUpdateSearchIndexRole, !Ref "UpdateSearchIndex", !Ref "AWS::NoValue"]]
             Action: 'es:ESHttp*'
+          - Effect: Allow
+            Principal:
+              AWS: "*"
+            Action: "*"
+            Condition: 
+              IpAddress: 
+                aws:SourceIp: "72.21.198.67"
       #       Resource: !Sub 'arn:aws:es:${AWS::Region}:${AWS::AccountId}:domain/test/*'
       # LogPublishingOptions:
       #   SEARCH_SLOW_LOGS:

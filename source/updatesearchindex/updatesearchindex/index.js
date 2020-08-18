@@ -3,8 +3,6 @@ var AWS = require("aws-sdk");
 exports.handler = (event, context, callback) => {
     // TODO implement
     //let xx = JSON.parse(event)
-    //  const { body } = event.Records[0];
-    //  console.log(body);
       const { body } = event.Records[0];
       console.log(body);
 
@@ -13,45 +11,51 @@ exports.handler = (event, context, callback) => {
       let jobId = message.JobId
       let status = message.Status
       let api = message.API
+      console.log("DEBUG, handler, api: " + api);
       let offset = message.Video.S3ObjectName.substr(27, 5) * 6006
       console.log("JobId: " + jobId);
       console.log("Status: "+ status);
       var params = {
         JobId: jobId, /* required */
       };
-
+      console.log("params.JobId: " + params.JobId);
     //** get mp3 file name : Video.S3ObjectName see https://docs.aws.amazon.com/rekognition/latest/dg/api-video.html
-    
-    var params = {
-      JobId: jobId, /* required */
-    };
     var rekognition = new AWS.Rekognition();
-    rekognition.getLabelDetection(params, function(err, data) {
+    rekognition.getCelebrityRecognition(params, function(err, data) {
       if (err) {
+          console.log("rekognition if (err) ");
           console.log(err, err.stack);
       }else {
+        console.log("rekognition else 1");
         console.log(data); 
+        console.log("rekognition else 2");
         //let datap = JSON.parse(data)
-        data.Labels.forEach(label => {
+        data.Celebrities.forEach(label => {
             //console.log(label);
+            console.log("data.Labels.forEac 1"  );
             label.Timestamp = label.Timestamp + offset
+            console.log("data.Labels.forEac 2"  );
             indexDocument(label, api)
+            console.log("data.Labels.forEac 3"  );
           });
       }
     });    
-
+  
 ////********
     callback();
 };
 
 function indexDocument(json, api) {
+    console.log("indexDocument 1"  );
     var region = process.env.REGION; // e.g. us-west-1
     var domain = process.env.DOMAIN; // e.g. search-domain.region.es.amazonaws.com //'/' + id;
     var index = "celebrity-detect"
+    console.log("DEBUG, indexDocument, api: " + api);
     if(api=="StartLabelDetection"){
+      console.log("DEBUG, indexDocument, if api==Star..");
       index = 'label-detect';      
     }
-
+    console.log('Debug, using index: ' + index);
     var type = '_doc';
     
     var endpoint = new AWS.Endpoint(domain);

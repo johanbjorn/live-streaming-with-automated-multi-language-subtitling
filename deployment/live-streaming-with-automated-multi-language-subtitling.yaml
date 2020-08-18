@@ -724,12 +724,14 @@ Resources:
       FunctionName: !Sub ${AWS::StackName}-CaptionGenerationLambda
       Description: Generated captions and sends this with the video into MediaPackage.
       Handler: lambda_function.lambda_handler
+      Layers:
+      - arn:aws:lambda:us-east-1:574913518171:layer:opencv-contrib-python:1
       Role: !GetAtt LambdaRoleCaptionCreation.Arn
       Code:
         S3Bucket: !Join ["-", [!FindInMap ["SourceCode", "General", "S3Bucket"], Ref: "AWS::Region"]]
         S3Key: !Join ["/", [!FindInMap ["SourceCode", "General", "KeyPrefix"],  "captionlambda.zip"]]
       Runtime:  python3.6
-      Timeout: 60
+      Timeout: 900
       MemorySize: 1024
       Environment:
         Variables:
@@ -741,6 +743,7 @@ Resources:
           transcribeLambdaARN: !GetAtt TranscribeLambda.Arn
           regkognitionRoleArn: !GetAtt RekognitionRole.Arn
           amazonRekognitionTopicArn: !Ref AmazonRekognitionTopic
+          PYTHONPATH: "/opt/"
 
 # Java Lambda
   TranscribeLambda:
@@ -768,10 +771,43 @@ Resources:
       FunctionName: !GetAtt CaptionCreation.Arn
       Principal: s3.amazonaws.com
       SourceAccount: !Ref 'AWS::AccountId'
+      
+  # CaptionCreationSnsPermissions:
+  #   Type: AWS::Lambda::Permission
+  #   Properties:
+  #     Action: lambda:InvokeFunction
+  #     Principal: sns.amazonaws.com
+  #     SourceArn: !Ref ExampleTopic
+  #     FunctionName: !GetAtt CaptionCreation.Arn
+      
+  # ExampleTopic:
+  #   Type: AWS::SNS::Topic
+  #   Properties:
+  #     DisplayName: !Sub '${AWS::StackName}-example-sns-topic'
+  #     TopicName: !Sub '${AWS::StackName}-example-sns-topic'
+  #     Subscription:
+  #       - Protocol: lambda
+  #         Endpoint: !GetAtt CaptionCreation.Arn
+          
+  # ExampleTopicPolicy:
+  #   Type: AWS::SNS::TopicPolicy
+  #   DependsOn: CaptionCreation
+  #   Properties: 
+  #     PolicyDocument: 
+  #       Version: 2012-10-17
+  #       Statement:
+  #         - Effect: Allow
+  #           Action:
+  #             - 'sns:Publish'
+  #           Resource: '*'
+  #           Principal: '*'
+  #     Topics: 
+  #       - !Ref ExampleTopic
 
   CaptionsBucket:
     Type: AWS::S3::Bucket
     DeletionPolicy: Retain
+    #DependsOn: ExampleTopicPolicy
     Properties:
       BucketEncryption:
         ServerSideEncryptionConfiguration:
@@ -786,6 +822,15 @@ Resources:
       VersioningConfiguration:
         Status: Enabled
       NotificationConfiguration:
+        # TopicConfigurations: 
+        #   - Topic: !Ref ExampleTopic
+        #     Event: "s3:ObjectCreated:*"
+        #     Filter:
+        #       S3Key:
+        #         Rules:
+        #           -
+        #             Name: suffix
+        #             Value: .m3u8
         LambdaConfigurations:
           -
             Function: !GetAtt CaptionCreation.Arn

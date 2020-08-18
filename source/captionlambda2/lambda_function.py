@@ -27,6 +27,13 @@
 #
 # ==================================================================================
 
+# custom labels function imports
+#import json
+#import boto3
+import cv2
+import math
+import io
+
 import os
 import sys
 import json
@@ -90,7 +97,44 @@ LANGUAGE_CODES = {
     'tr': 'Turkish'
 }
 
+def analyzeVideo(videoFile):
+    #videoFile = "video file"
+    projectVersionArn = "arn:aws:rekognition:us-east-1:574913518171:project/throwin-small/version/throwin-small.2020-08-14T14.57.46/1597409866201"
 
+    rekognition = boto3.client('rekognition')        
+    customLabels = []    
+    cap = cv2.VideoCapture(videoFile)
+    frameRate = cap.get(5) #frame rate
+    print("frameRate " + frameRate)
+    while(cap.isOpened()):
+        frameId = cap.get(1) #current frame number
+        print("Processing frame id: {}".format(frameId))
+        ret, frame = cap.read()
+        if (ret != True):
+            break
+        if (frameId % math.floor(frameRate) == 0):
+            hasFrame, imageBytes = cv2.imencode(".jpg", frame)
+
+            if(hasFrame):
+                response = rekognition.detect_custom_labels(
+                    Image={
+                        'Bytes': imageBytes.tobytes(),
+                    },
+                    ProjectVersionArn = projectVersionArn
+                )
+            
+            for elabel in response["CustomLabels"]:
+                elabel["Timestamp"] = (frameId/frameRate)*1000
+                customLabels.append(elabel)
+    
+    print(customLabels)
+
+    with open(videoFile + ".json", "w") as f:
+        f.write(json.dumps(customLabels)) 
+
+    cap.release()
+    
+    
 # ==================================================================================
 # Function: get_mediapackage_password
 # Purpose: MediaPackage Password is stored in SSM. I look there to get it in my code. 
@@ -207,6 +251,10 @@ def get_text_from_transcribe(ts_file_path):
     # After FFMPEG send the file into S3 and generate presigned URL.
     print("checking to see if mp4 exists " + output_mp4 + ' ' + str(os.path.exists(output_mp4)))
     
+    print("before calling analyzeVideo()")
+    analyzeVideo(output_mp4)
+    print("after calling analyzeVideo()")
+    
     s3_key2 = 'mp4/' + output_mp4.split('/')[-1]
     print("DEBUG: After FFMPEG send the file, output_mp4 " + output_mp4)
     print("DEBUG: After FFMPEG send the file, s3_key2 " + s3_key2)
@@ -223,13 +271,13 @@ def get_text_from_transcribe(ts_file_path):
     amazonRekognitionTopicArn = os.environ['amazonRekognitionTopicArn']
     print("DEBUG: rekogRole.arn " + regkognitionRoleArn)
     print("DEBUG: amazonRekognitionTopicArn " + amazonRekognitionTopicArn)
-    response=rek.start_label_detection(Video={'S3Object': {'Bucket': BUCKET_NAME, 'Name': s3_key2}},
-        NotificationChannel={'RoleArn': regkognitionRoleArn, 'SNSTopicArn': amazonRekognitionTopicArn})
-    print('Start Job Id: ' + response['JobId'])  
+    # response=rek.start_label_detection(Video={'S3Object': {'Bucket': BUCKET_NAME, 'Name': s3_key2}},
+    #     NotificationChannel={'RoleArn': regkognitionRoleArn, 'SNSTopicArn': amazonRekognitionTopicArn})
+    # print('Start Job Id: ' + response['JobId'])  
     #print('Start Job response: ' + response) 
     
     # celebrity-detection 
-    rek.start_celebrity_recognition(Video={'S3Object': {'Bucket': BUCKET_NAME, 'Name': s3_key2}},
+    response=rek.start_celebrity_recognition(Video={'S3Object': {'Bucket': BUCKET_NAME, 'Name': s3_key2}},
         NotificationChannel={'RoleArn': regkognitionRoleArn, 'SNSTopicArn': amazonRekognitionTopicArn})
     print('Start Job Id, celebrity: ' + response['JobId'])         
 

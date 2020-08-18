@@ -69,7 +69,7 @@ sed -i '' -e $replace $template_dist_dir/*.template
 echo "------------------------------------------------------------------------------"
 echo "[Rebuild] captionlambda Function"
 echo "------------------------------------------------------------------------------"
-cd $source_dir/captionlambda2/ 
+cd $source_dir/captionlambda3/ 
 #pip3 install -r ./requirements.txt -t . 
 echo $PWD
 pip3 install -r ./requirements.txt -t . 
