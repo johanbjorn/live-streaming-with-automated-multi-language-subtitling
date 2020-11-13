@@ -21,10 +21,12 @@ Resources:
       #     MasterUserOptionsF        
       DomainName: !Sub "${AWS::StackName}-test"
       ElasticsearchClusterConfig:
-        DedicatedMasterEnabled: 'false'
+        DedicatedMasterEnabled: 'true'
+        DedicatedMasterCount: 3
         InstanceCount: '1'
         ZoneAwarenessEnabled: 'false'
-        InstanceType: m4.large.elasticsearch
+        DedicatedMasterType: m3.medium.elasticsearch
+        InstanceType: r4.xlarge.elasticsearch
       ElasticsearchVersion: 7.4
       EBSOptions:
         EBSEnabled: true

@@ -1,0 +1,8 @@
+requests
+aws_xray_sdk
+boto3
+botocore
+requests
+elasticsearch
+urllib3
+requests_aws4auth

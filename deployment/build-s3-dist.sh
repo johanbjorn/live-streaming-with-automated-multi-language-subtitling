@@ -67,29 +67,29 @@ echo "sed -i '' -e $replace $template_dist_dir/*.template"
 sed -i '' -e $replace $template_dist_dir/*.template
 
 echo "------------------------------------------------------------------------------"
-echo "[Rebuild] captionlambda Function"
+echo "[Rebuild] startcelebritydetection Function"
 echo "------------------------------------------------------------------------------"
-cd $source_dir/captionlambda3/ 
-#pip3 install -r ./requirements.txt -t . 
+cd $source_dir/startcelebritydetection/ 
+pip3 install -r ./requirements.txt -t . 
+zip -q -r9 $build_dist_dir/startcelebritydetection.zip *
+
+echo "------------------------------------------------------------------------------"
+echo "[Rebuild] detectcustomlabels Function"
+echo "------------------------------------------------------------------------------"
+cd $source_dir/detectcustomlabels/ 
 echo $PWD
 pip3 install -r ./requirements.txt -t . 
-zip -q -r9 $build_dist_dir/captionlambda.zip *
-
-#zip -q -r9 $build_dist_dir/captionlambda.zip *
+zip -q -r9 $build_dist_dir/detectcustomlabels.zip *
 
 echo "------------------------------------------------------------------------------"
-echo "[Rebuild] alt-cust-res Function"
+echo "[Rebuild] customresources Function"
 echo "------------------------------------------------------------------------------"
-cd $source_dir/alt-cust-res/ 
+cd $source_dir/customresources/ 
 pip3 install -r ./requirements.txt -t . 
-zip -q -r9 $build_dist_dir/custom-resource-py.zip *
-
+zip -q -r9 $build_dist_dir/customresources-py.zip *
 
 echo "------------------------------------------------------------------------------"
-echo "[Rebuild] alt-cust-res Function"
+echo "[Rebuild] updatecelebrityindex Function"
 echo "------------------------------------------------------------------------------"
-cd $source_dir/updatesearchindex/ 
-zip -q -r9 $build_dist_dir/update-search-engine.zip * -x ".application.json" -x ".gitignore" -x "template.yaml"
-# Build Transcribelambda (Moving the ZIP file into the distribution directory)
-# cd $deployment_dir/..
-cp $source_dir/transcribelambda/TranscribeStreamingJavaLambda.jar $build_dist_dir/
+cd $source_dir/updatecelebrityindex/ 
+zip -q -r9 $build_dist_dir/updatecelebrityindex.zip * -x ".application.json" -x ".gitignore" -x "template.yaml"
